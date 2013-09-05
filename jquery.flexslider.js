@@ -3,6 +3,14 @@
  * Copyright 2012 WooThemes
  * Contributing Author: Tyler Smith
  */
+
+/*
+ * Hi, it's a me, Pascal <pascal.hertleif@ruhmesmeile.com>!
+ *
+ * I changed some stuff around to to allow more than one control container.
+ * So now you can put one control container in each of your slides, for
+ * example. Enjoy!
+ */
 ;
 (function ($) {
 
@@ -228,12 +236,15 @@
 
           methods.controlNav.active();
 
-          slider.controlNavScaffold.delegate('a, img', eventType, function(event) {
+          $(slider.controlsContainer).delegate('a, img', eventType, function(event) {
             event.preventDefault();
 
             if (watchedEvent === "" || watchedEvent === event.type) {
-              var $this = $(this),
-                  target = slider.controlNav.index($this);
+              var $this = $(this);
+              // var target = slider.controlNav.index($this);
+              // EDIT to allow more than one control container
+              var target = $this.parents('.'+namespace + 'control-nav').find('a, img')
+              .index($this);
 
               if (!$this.hasClass(namespace + 'active')) {
                 slider.direction = (target > slider.currentSlide) ? "next" : "prev";
@@ -257,8 +268,10 @@
             event.preventDefault();
 
             if (watchedEvent === "" || watchedEvent === event.type) {
-              var $this = $(this),
-                  target = slider.controlNav.index($this);
+              var $this = $(this);
+              // var target = slider.controlNav.index($this);
+              // EDIT to allow more than one control container
+              var target = $this.parents(slider.controlsContainer).index($this);
 
               if (!$this.hasClass(namespace + 'active')) {
                 (target > slider.currentSlide) ? slider.direction = "next" : slider.direction = "prev";
@@ -275,10 +288,17 @@
         },
         set: function() {
           var selector = (slider.vars.controlNav === "thumbnails") ? 'img' : 'a';
+          // EDIT to allow more than one control container
+          slider.controlNavs = $('.' + namespace + 'control-nav');
           slider.controlNav = $('.' + namespace + 'control-nav li ' + selector, (slider.controlsContainer) ? slider.controlsContainer : slider);
         },
         active: function() {
-          slider.controlNav.removeClass(namespace + "active").eq(slider.animatingTo).addClass(namespace + "active");
+          var selector = (slider.vars.controlNav === "thumbnails") ? 'img' : 'a';
+          slider.controlNavs.each(function () {
+            $(this)
+            .find('li ' + selector)
+            .removeClass(namespace + "active").eq(slider.animatingTo).addClass(namespace + "active");
+          });
         },
         update: function(action, pos) {
           if (slider.pagingCount > 1 && action === "add") {
@@ -1051,7 +1071,7 @@
     // Usability features
     pauseOnAction: true,            //Boolean: Pause the slideshow when interacting with control elements, highly recommended.
     pauseOnHover: false,            //Boolean: Pause the slideshow when hovering over slider, then resume when no longer hovering
-    pauseInvisible: true,   		//{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
+    pauseInvisible: true,       //{NEW} Boolean: Pause the slideshow when tab is invisible, resume when visible. Provides better UX, lower CPU usage.
     useCSS: true,                   //{NEW} Boolean: Slider will use CSS3 transitions if available
     touch: true,                    //{NEW} Boolean: Allow touch swipe navigation of the slider on touch-enabled devices
     video: false,                   //{NEW} Boolean: If using video in the slider, will prevent CSS3 3D Transforms to avoid graphical glitches
